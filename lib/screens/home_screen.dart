@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:my_qr_code/constants.dart';
 import 'package:my_qr_code/screens/login_screen.dart';
@@ -12,12 +13,35 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   String data = 'hello';
   final _auth = FirebaseAuth.instance;
   bool error = false;
 
   TextEditingController qrTextEditingController = TextEditingController();
+
+  AnimationController controller;
+  Animation animation;
+
+  @override
+  void initState() {
+    controller = AnimationController(
+      duration: Duration(seconds: 1),
+      vsync: this,
+    );
+    controller.forward();
+
+    animation = CurvedAnimation(parent: controller, curve: Curves.decelerate);
+
+    controller.addListener(() {
+      setState(() {});
+      print(animation.value);
+    });
+    super.initState();
+  }
+
   void onChangedData(n) {
     data = n;
     setState(() {
@@ -25,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+//checks if value is empty and pushes to qr screen
   void onTapGenerate() {
     setState(() {
       qrTextEditingController.text.isEmpty ? error = true : error = false;
@@ -45,9 +70,35 @@ class _HomeScreenState extends State<HomeScreen> {
     qrTextEditingController.clear();
   }
 
-  void onTapLogout() {
+  void logOut() {
     _auth.signOut();
     Navigator.pushNamed(context, LoginScreen.id);
+  }
+
+  void onTapLogout(BuildContext context) {
+    //Cupertino Dialog Box
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: new Text("Log out of MyQuer?"),
+        content: new Text("Don't leave us!"),
+        actions: <Widget>[
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: Text("Yes"),
+            onPressed: () {
+              logOut();
+            },
+          ),
+          CupertinoDialogAction(
+            child: Text("No"),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          )
+        ],
+      ),
+    );
   }
 
   @override
@@ -57,16 +108,41 @@ class _HomeScreenState extends State<HomeScreen> {
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
+        key: _scaffoldKey,
+
+        //Drawer
+        endDrawer: CustomDrawer(
+          onTapLogOut: () {
+            onTapLogout(context);
+          },
+        ),
+
         body: SingleChildScrollView(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 10),
             child: Column(
               children: [
                 SizedBox(
+                  height: height * 0.02,
+                ),
+
+                //Drawer Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    DrawerButton(
+                      scaffoldKey: _scaffoldKey,
+                    ),
+                  ],
+                ),
+                SizedBox(
                   height: height * 0.15,
                 ),
+
+                //Generate Qr code message
                 Text(
-                  'Generate Your\n    QR code',
+                  'Generate Your\n    QR code ${(animation.value * 100).round()}%',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -74,14 +150,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SizedBox(
-                  height: height * 0.15,
+                  height: height * 0.05,
                 ),
+
+                //Link textField
                 TextFieldWidget(
                   hintText: 'Enter link',
                   onChanged: onChangedData,
                   controller: qrTextEditingController,
                   errorText: error ? kLinkErrorText : null,
                 ),
+
+                //Generate button
                 ActionButtonWidget(
                   title: 'Generate',
                   passedWidth: width * 0.69,
@@ -90,14 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   height: height * 0.3,
                 ),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: ActionButtonWidget(
-                    title: 'log out',
-                    passedWidth: width * 0.24,
-                    onTap: onTapLogout,
-                  ),
-                )
               ],
             ),
           ),

@@ -24,6 +24,20 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  void onChangedEmail(n) {
+    setState(() {
+      validate = false;
+    });
+    email = n;
+  }
+
+  void onChangedPassword(n) {
+    setState(() {
+      validate = false;
+    });
+    password = n;
+  }
+
   void onTapSignin() async {
     setState(() {
       showSpinner = true;
@@ -50,20 +64,6 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  void onChangedEmail(n) {
-    setState(() {
-      validate = false;
-    });
-    email = n;
-  }
-
-  void onChangedPassword(n) {
-    setState(() {
-      validate = false;
-    });
-    password = n;
-  }
-
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -86,26 +86,41 @@ class _SignupScreenState extends State<SignupScreen> {
                 SizedBox(
                   height: height * 0.02,
                 ),
+
+                //Back button
                 BackButton(
                   color: kMainColor,
                 ),
-                Text(
-                  'MyQuer',
-                  style: TextStyle(
-                    color: kMainColor,
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold,
+
+                //Logo
+                Hero(
+                  tag: 'logo',
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      height: (height * 0.18),
+                      width: (width * 0.32),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('images/QRLogo.png'),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(
                   height: height * 0.1,
                 ),
+
+                //Email field
                 TextFieldWidget(
                   hintText: 'email',
                   onChanged: onChangedEmail,
                   errorText: validate ? 'Invalid value' : null,
                   controller: emailController,
                 ),
+
+                //Password field
                 TextFieldWidget(
                   hintText: 'password',
                   onChanged: onChangedPassword,
@@ -113,6 +128,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   errorText: validate ? 'Invalid value' : null,
                   controller: passwordController,
                 ),
+
+                //Sign up button
                 ActionButtonWidget(
                   onTap: onTapSignin,
                   title: 'Sign up',

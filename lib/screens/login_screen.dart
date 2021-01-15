@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -47,6 +45,23 @@ class _LoginScreenState extends State<LoginScreen>
     super.initState();
   }
 
+  void onChangedEmail(n) {
+    //when the value is changed the error text goes away
+    setState(() {
+      validate = false;
+    });
+    email = n;
+  }
+
+  void onChangedPassword(n) {
+    //when the value is changed the error text goes away
+    setState(() {
+      validate = false;
+    });
+    password = n;
+  }
+
+  //login
   void onTapLogin() async {
     setState(() {
       showSpinner = true;
@@ -71,22 +86,6 @@ class _LoginScreenState extends State<LoginScreen>
     Navigator.pushNamed(context, SignupScreen.id);
   }
 
-  void onChangedEmail(n) {
-    //when the value is changed the error text goes away
-    setState(() {
-      validate = false;
-    });
-    email = n;
-  }
-
-  void onChangedPassword(n) {
-    //when the value is changed the error text goes away
-    setState(() {
-      validate = false;
-    });
-    password = n;
-  }
-
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -100,32 +99,42 @@ class _LoginScreenState extends State<LoginScreen>
       child: Scaffold(
         body: SingleChildScrollView(
           child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 20,
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  height: height * 0.1,
+                  height: height * 0.05,
                 ),
-                Text(
-                  'MyQuer',
-                  style: TextStyle(
-                    color: kMainColor,
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold,
+
+                //Logo
+                Hero(
+                  tag: 'logo',
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      height: animation.value * (height * 0.18),
+                      width: animation.value * (width * 0.32),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('images/QRLogo.png'),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(
-                  height: height * 0.1,
+                  height: height * 0.08,
                 ),
+
+                //Email field
                 TextFieldWidget(
                   hintText: 'email',
                   onChanged: onChangedEmail,
                   errorText: validate ? 'Invalid value' : null,
                   controller: emailController,
                 ),
+
+                //Password field
                 TextFieldWidget(
                   onChanged: onChangedPassword,
                   hintText: 'password',
@@ -133,6 +142,8 @@ class _LoginScreenState extends State<LoginScreen>
                   errorText: validate ? 'Invalid value' : null,
                   controller: passwordController,
                 ),
+
+                //Login Button
                 ActionButtonWidget(
                   title: 'Log in',
                   passedWidth: width * 0.24,
@@ -141,6 +152,8 @@ class _LoginScreenState extends State<LoginScreen>
                 SizedBox(
                   height: height * 0.25,
                 ),
+
+                //Sign up button
                 Align(
                   alignment: Alignment.center,
                   child: ActionButtonWidget(
